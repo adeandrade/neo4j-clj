@@ -62,6 +62,15 @@ from https://github.com/neo4j/java-rest-binding.
 In order to run the tests you need to add the plugin available from
 https://github.com/jexp/neo4j-clean-remote-db-addon.
 
+## Installation
+
+`neo4j-clj` is available as a Maven artifact from
+[Clojars](http://clojars.org/neo4j-clj):
+
+```clojure
+[neo4j-clj "0.0.1-SNAPSHOT"]
+```
+
 ## License
 
 Released under the MIT License:
