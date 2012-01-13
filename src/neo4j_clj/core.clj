@@ -190,14 +190,14 @@
 ;;  Indexes
 
 (defn create-node-index
-  [name]
-  (let [index (.index *db*)]
-    (.forNodes index (name name))))
+  [index-name]
+  (let [index-manager (.index *db*)]
+    (.forNodes index-manager (name index-name))))
 
 (defn create-relationship-index
-  [name]
-  (let [index (.index *db*)]
-    (.forRelationships index (name name))))
+  [index-name]
+  (let [index-manager (.index *db*)]
+    (.forRelationships index-manager (name index-name))))
 
 (defn add-to-index
   [index node k v]
