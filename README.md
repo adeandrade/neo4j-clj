@@ -68,7 +68,7 @@ https://github.com/jexp/neo4j-clean-remote-db-addon.
 [Clojars](http://clojars.org/neo4j-clj):
 
 ```clojure
-[neo4j-clj "0.0.1-SNAPSHOT"]
+[neo4j-clj "0.0.2-SNAPSHOT"]
 ```
 
 ## License
