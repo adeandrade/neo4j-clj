@@ -214,16 +214,87 @@
   (.add index node (name k) v)
   node)
 
-(defn get-hit
-  [index k v]
-  (.. index
-      (get (name k) v)
-      getSingle))
+(defn- search-node-index
+  [index]
+  (if (or (instance? String index) (instance? clojure.lang.Keyword index))
+    (create-node-index index)
+    index))
 
-(defn get-hits
+(defn- search-relationship-index
+  [index]
+  (if (or (instance? String index) (instance? clojure.lang.Keyword index))
+    (create-relationship-index index)
+    index))
+
+(defn- get-hits
+  [results]
+  (seq results))
+
+(defn- get-hit
+  [results]
+  (.getSingle results))
+
+(defn- get-relationship-results
   [index k v]
-  (seq (.. index
-           (get (name k) v))))
+  (let [index (search-relationship-index index)]
+    (.get index (name k) v)))
+
+(defn get-relationship-hits
+  [& args]
+  (get-hits (apply get-relationship-results args)))
+
+(defn get-relationship-hit
+  [& args]
+  (get-hit (apply get-relationship-results args)))
+
+(defn- query-relationship-results
+  ([index q]
+     (query-relationship-results index q nil nil))
+  ([index k q]
+     (query-relationship-results index k q nil nil))
+  ([index q start-node end-node]
+     (let [index (search-relationship-index index)]
+       (.query index q start-node end-node)))
+  ([index k q start-node end-node]
+     (let [index (search-relationship-index index)]
+       (.query index (name k) q start-node end-node))))
+
+(defn query-relationship-hits
+  [& args]
+  (get-hits (apply query-relationship-results args)))
+
+(defn query-relationship-hit
+  [& args]
+  (get-hit (apply query-relationship-results args)))
+
+(defn- get-node-results
+  [index k v]
+  (let [index (search-node-index index)]
+    (.get index (name k) v)))
+
+(defn get-node-hits
+  [& args]
+  (get-hits (apply get-node-results args)))
+
+(defn get-node-hit
+  [& args]
+  (get-hit (apply get-node-results args)))
+
+(defn- query-node-results
+  ([index q]
+     (let [index (search-node-index index)]
+       (.query index q)))
+  ([index k q]
+     (let [index (search-node-index index)]
+       (.query index (name k) q))))
+
+(defn query-node-hits
+  [& args]
+  (get-hits (apply query-node-results args)))
+
+(defn query-node-hit
+  [& args]
+  (get-hit (apply query-node-results args)))
 
 ;;; --------------------------------------------------------------------------------
 ;;  Cypher Interface
