@@ -165,7 +165,7 @@
      (.createNode *db*))
 
   ([m]
-     (doto (.createNode *db*)
+     (doto (create-node)
        (associate m))))
 
 (defn relationships
@@ -281,12 +281,14 @@
   (get-hit (apply get-node-results args)))
 
 (defn- query-node-results
-  ([index q]
-     (let [index (search-node-index index)]
-       (.query index q)))
-  ([index k q]
-     (let [index (search-node-index index)]
-       (.query index (name k) q))))
+  [index & args]
+  (let [index (search-node-index index)
+        function (fn
+                   ([index q]
+                      (.query index q))
+                   ([index k q]
+                      (.query index (name k) q)))]
+    (apply function index args)))
 
 (defn query-node-hits
   [& args]
