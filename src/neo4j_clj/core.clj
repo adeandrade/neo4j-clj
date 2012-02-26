@@ -46,9 +46,7 @@
 
 (defn ^RelationshipType as-relationship
   "Creates a Neo4j relationship type object from a keyword.
-
-  Copied from borneo hence same caveats apply: should we cache these?
-  "
+  Copied from borneo hence same caveats apply: should we cache these?"
   [k]
   (reify RelationshipType
          (^String name [this] (name k))))
