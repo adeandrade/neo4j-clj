@@ -236,6 +236,24 @@
   (let [index (search-relationship-index)]
     (.delete index)))
 
+(defn- remove-from-index
+   ([index node]
+      (.remove index node))
+   ([index node k]
+      (.remove index k))
+   ([index node k v]
+      (.remove index k v)))
+
+(defn remove-from-node-index
+  [index & args]
+  (let [index (search-node-index index)]
+    (apply remove-from-index index args)))
+
+(defn remove-from-relationship-index
+  [index & args]
+  (let [index (search-relationship-index index)]
+    (apply remove-from-index index args)))
+
 (defn- get-hits
   [results]
   (seq results))
