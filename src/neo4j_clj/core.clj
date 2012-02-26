@@ -226,6 +226,16 @@
     (create-relationship-index index)
     index))
 
+(defn delete-node-index
+  [index]
+  (let [index (search-node-index index)]
+    (.delete index)))
+
+(defn delete-relationship-index
+  [index]
+  (let [index (search-relationship-index)]
+    (.delete index)))
+
 (defn- get-hits
   [results]
   (seq results))
