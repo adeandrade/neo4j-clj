@@ -49,7 +49,7 @@
   Copied from borneo hence same caveats apply: should we cache these?"
   [k]
   (reify RelationshipType
-         (^String name [this] (name k))))
+    (^String name [this] (name k))))
 
 (defmacro with-connection [db & body]
   `(binding [*db* ~db]
@@ -207,11 +207,6 @@
   (let [index-manager (.index *db*)]
     (.forRelationships index-manager (name index-name))))
 
-(defn add-to-index
-  [index node k v]
-  (.add index node (name k) v)
-  node)
-
 (defn- search-node-index
   [index]
   (if (or (instance? String index) (instance? clojure.lang.Keyword index))
@@ -223,6 +218,20 @@
   (if (or (instance? String index) (instance? clojure.lang.Keyword index))
     (create-relationship-index index)
     index))
+
+(defn- add-to-index
+  [index node k v]
+  (.add index node (name k) v))
+
+(defn add-to-node-index
+  [index & args]
+  (let [index (search-node-index index)]
+    (apply add-to-index index args)))
+
+(defn add-to-relationship-index
+  [index & args]
+  (let [index (search-relationship-node index)]
+    (apply add-to-index index args)))
 
 (defn delete-node-index
   [index]
