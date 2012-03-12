@@ -6,7 +6,7 @@
 
 ;;; --------------------------------------------------------------------------------
 
-(def ^:dynamic *db* nil)
+(defonce ^:dynamic *db* nil)
 
 (defn make-embedded-db
   [path]
