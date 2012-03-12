@@ -207,131 +207,61 @@
   (let [index-manager (.index *db*)]
     (.forRelationships index-manager (name index-name))))
 
-(defn- search-node-index
-  [index]
-  (if (or (instance? String index) (instance? clojure.lang.Keyword index))
-    (create-node-index index)
-    index))
+(defn get-indexes
+  [indexes]
+  (if (map? indexes)
+    (let [make-collection #(if (nil? %) nil (if (coll? %) % '(%)))
+          node-indexes (map create-node-index (make-collection (:nodes indexes)))
+          relationship-indexes (map create-relationship-index (make-collection (:relationships indexes)))]
+      (concat node-indexes relationship-indexes))
+    indexes))
 
-(defn- search-relationship-index
-  [index]
-  (if (or (instance? String index) (instance? clojure.lang.Keyword index))
-    (create-relationship-index index)
-    index))
+(defmacro with-index
+  [indexes & body]
+  `(for [~'index (get-indexes ~indexes)]
+     (do ~@body)))
 
-(defn- add-to-index
-  [index node k v]
-  (.add index node (name k) v))
+(defmacro add-to-index
+  [node k v]
+  `(.add ~'index ~node (name ~k) ~v))
 
-(defn add-to-node-index
-  [index & args]
-  (let [index (search-node-index index)]
-    (apply add-to-index index args)))
+(defmacro delete-index
+  []
+  `(.delete ~'index))
 
-(defn add-to-relationship-index
-  [index & args]
-  (let [index (search-relationship-node index)]
-    (apply add-to-index index args)))
+(defmacro remove-from-index
+   ([node]
+      `(.remove ~node))
+   ([node k]
+      `(.remove ~node ~k))
+   ([node k v]
+      `(.remove `node ~k ~v)))
 
-(defn delete-node-index
-  [index]
-  (let [index (search-node-index index)]
-    (.delete index)))
+(defmacro get-hits
+  [k v]
+  `(seq (.get ~'index (name ~k) ~v)))
 
-(defn delete-relationship-index
-  [index]
-  (let [index (search-relationship-index)]
-    (.delete index)))
+(defmacro get-hit
+  [k v]
+  `(.. (.get ~'index (name ~k) ~v) (getSingle)))
 
-(defn- remove-from-index
-   ([index node]
-      (.remove index node))
-   ([index node k]
-      (.remove index k))
-   ([index node k v]
-      (.remove index k v)))
-
-(defn remove-from-node-index
-  [index & args]
-  (let [index (search-node-index index)]
-    (apply remove-from-index index args)))
-
-(defn remove-from-relationship-index
-  [index & args]
-  (let [index (search-relationship-index index)]
-    (apply remove-from-index index args)))
-
-(defn- get-hits
-  [results]
-  (seq results))
-
-(defn- get-hit
-  [results]
-  (.getSingle results))
-
-(defn- get-relationship-results
-  [index k v]
-  (let [index (search-relationship-index index)]
-    (.get index (name k) v)))
-
-(defn get-relationship-hits
-  [& args]
-  (get-hits (apply get-relationship-results args)))
-
-(defn get-relationship-hit
-  [& args]
-  (get-hit (apply get-relationship-results args)))
-
-(defn- query-relationship-results
+(defn- query-results
   ([index q]
-     (query-relationship-results index q nil nil))
+     (.query index q))
   ([index k q]
-     (query-relationship-results index k q nil nil))
+     (.query index (name k) q))
   ([index q start-node end-node]
-     (let [index (search-relationship-index index)]
-       (.query index q start-node end-node)))
+     (.query index q start-node end-node))
   ([index k q start-node end-node]
-     (let [index (search-relationship-index index)]
-       (.query index (name k) q start-node end-node))))
+     (.query index (name k) q start-node end-node)))
 
-(defn query-relationship-hits
+(defmacro query-hits
   [& args]
-  (get-hits (apply query-relationship-results args)))
+  `(seq (query-results ~'index ~@args)))
 
-(defn query-relationship-hit
+(defmacro query-hit
   [& args]
-  (get-hit (apply query-relationship-results args)))
-
-(defn- get-node-results
-  [index k v]
-  (let [index (search-node-index index)]
-    (.get index (name k) v)))
-
-(defn get-node-hits
-  [& args]
-  (get-hits (apply get-node-results args)))
-
-(defn get-node-hit
-  [& args]
-  (get-hit (apply get-node-results args)))
-
-(defn- query-node-results
-  [index & args]
-  (let [index (search-node-index index)
-        function (fn
-                   ([index q]
-                      (.query index q))
-                   ([index k q]
-                      (.query index (name k) q)))]
-    (apply function index args)))
-
-(defn query-node-hits
-  [& args]
-  (get-hits (apply query-node-results args)))
-
-(defn query-node-hit
-  [& args]
-  (get-hit (apply query-node-results args)))
+  `(.getSingle (query-results ~'index ~@args)))
 
 ;;; --------------------------------------------------------------------------------
 ;;  Cypher Interface
